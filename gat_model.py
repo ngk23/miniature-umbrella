@@ -5,29 +5,19 @@ from torch_geometric.data import Data
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-# Generate synthetic graph data for demonstration purposes
 def generate_graph_data(num_nodes):
-    # Randomly generate node features and edge indices
     x = torch.rand((num_nodes, 3), dtype=torch.float)
     edge_index = torch.randint(0, num_nodes, (2, num_nodes * 2), dtype=torch.long)
     return x, edge_index
 
-# Generate synthetic labels for demonstration purposes
 def generate_labels(num_samples):
     return np.random.randint(0, 2, num_samples)
-
-# Prepare graph data
 num_nodes = 1000
 x, edge_index = generate_graph_data(num_nodes)
 labels = generate_labels(num_nodes)
-
-# Create a PyTorch Geometric Data object
 data = Data(x=x, edge_index=edge_index, y=torch.tensor(labels, dtype=torch.long))
-
-# Split data into training and testing sets
 train_mask, test_mask = train_test_split(np.arange(num_nodes), test_size=0.2, random_state=42)
 
-# Define a GAT model
 class GATModel(torch.nn.Module):
     def __init__(self, hidden_units=64, dropout_rate=0.5):
         super(GATModel, self).__init__()
@@ -44,12 +34,9 @@ class GATModel(torch.nn.Module):
         x = self.conv3(x, edge_index)
         return F.log_softmax(x, dim=1)
 
-# Initialize the GAT model
 model = GATModel()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 criterion = torch.nn.CrossEntropyLoss()
-
-# Training loop with learning rate scheduling and early stopping
 best_acc = 0
 patience = 10
 patience_counter = 0
@@ -68,7 +55,6 @@ for epoch in range(1, 101):
     acc = correct / len(test_mask)
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, Test Accuracy: {acc:.4f}')
     
-    # Check for early stopping
     if acc > best_acc:
         best_acc = acc
         patience_counter = 0

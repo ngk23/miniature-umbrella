@@ -6,29 +6,20 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from itertools import product
 
-# Generate synthetic graph data for demonstration purposes
 def generate_graph_data(num_nodes):
-    # Randomly generate node features and edge indices
     x = torch.rand((num_nodes, 3), dtype=torch.float)
     edge_index = torch.randint(0, num_nodes, (2, num_nodes * 2), dtype=torch.long)
     return x, edge_index
 
-# Generate synthetic labels for demonstration purposes
 def generate_labels(num_samples):
     return np.random.randint(0, 2, num_samples)
 
-# Prepare graph data
 num_nodes = 1000
 x, edge_index = generate_graph_data(num_nodes)
 labels = generate_labels(num_nodes)
-
-# Create a PyTorch Geometric Data object
 data = Data(x=x, edge_index=edge_index, y=torch.tensor(labels, dtype=torch.long))
-
-# Split data into training and testing sets
 train_mask, test_mask = train_test_split(np.arange(num_nodes), test_size=0.2, random_state=42)
 
-# Define an enhanced GNN model with GraphSAGE layers
 class EnhancedGNNModel(torch.nn.Module):
     def __init__(self, hidden_units=64, dropout_rate=0.5):
         super(EnhancedGNNModel, self).__init__()
@@ -52,20 +43,14 @@ class EnhancedGNNModel(torch.nn.Module):
         x = self.conv4(x, edge_index)
         return F.log_softmax(x, dim=1)
 
-# Initialize the enhanced model, optimizer, and loss function
 model = EnhancedGNNModel()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 criterion = torch.nn.CrossEntropyLoss()
-
-# Implement a learning rate scheduler
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.5)
-
-# Implement early stopping
 best_acc = 0
 patience = 10
 patience_counter = 0
 
-# Train the model
 def train():
     model.train()
     optimizer.zero_grad()
@@ -75,7 +60,6 @@ def train():
     optimizer.step()
     return loss.item()
 
-# Evaluate the model
 def test():
     model.eval()
     _, pred = model(data).max(dim=1)
@@ -83,17 +67,14 @@ def test():
     acc = correct / len(test_mask)
     return acc
 
-# Training loop with learning rate scheduling and early stopping
 for epoch in range(1, 101):
     loss = train()
     acc = test()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, Test Accuracy: {acc:.4f}')
     
-    # Step the optimizer before the scheduler
     optimizer.step()
     scheduler.step()
     
-    # Check for early stopping
     if acc > best_acc:
         best_acc = acc
         patience_counter = 0
@@ -104,7 +85,6 @@ for epoch in range(1, 101):
         print('Early stopping triggered')
         break
 
-# Define a function to perform hyperparameter tuning
 def hyperparameter_tuning():
     best_acc = 0
     best_params = None
@@ -128,7 +108,6 @@ def hyperparameter_tuning():
 
     print(f'Best Accuracy: {best_acc:.4f} with params: Learning Rate={best_params[0]}, Hidden Units={best_params[1]}, Dropout Rate={best_params[2]}')
 
-# Define an ensemble of GNN models
 class EnsembleGNNModel(torch.nn.Module):
     def __init__(self, num_models=3):
         super(EnsembleGNNModel, self).__init__()
@@ -138,11 +117,9 @@ class EnsembleGNNModel(torch.nn.Module):
         outputs = [model(data) for model in self.models]
         return torch.mean(torch.stack(outputs), dim=0)
 
-# Initialize the ensemble model
 ensemble_model = EnsembleGNNModel()
 optimizer = torch.optim.Adam(ensemble_model.parameters(), lr=0.01)
 
-# Train and evaluate the ensemble model
 for epoch in range(1, 101):
     loss = train()
     acc = test()
@@ -158,10 +135,8 @@ for epoch in range(1, 101):
         print('Early stopping triggered')
         break
 
-# Perform hyperparameter tuning
 hyperparameter_tuning()
 
-# Define a GAT model
 class GATModel(torch.nn.Module):
     def __init__(self, hidden_units=64, dropout_rate=0.5):
         super(GATModel, self).__init__()
@@ -178,22 +153,18 @@ class GATModel(torch.nn.Module):
         x = self.conv3(x, edge_index)
         return F.log_softmax(x, dim=1)
 
-# Initialize the GAT model
 model = GATModel()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 criterion = torch.nn.CrossEntropyLoss()
 
-# Training loop with learning rate scheduling and early stopping
 for epoch in range(1, 101):
     loss = train()
     acc = test()
     print(f'Epoch: {epoch:03d}, Loss: {loss:.4f}, Test Accuracy: {acc:.4f}')
     
-    # Step the optimizer before the scheduler
     optimizer.step()
     scheduler.step()
     
-    # Check for early stopping
     if acc > best_acc:
         best_acc = acc
         patience_counter = 0
